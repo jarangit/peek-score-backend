@@ -20,7 +20,6 @@ export class APIFootballHttpService {
   ) {}
 
   get(url: string, params?: any) {
-    console.log('API_FOOTBALL_CONFIG', this.API_FOOTBALL_CONFIG);
     return this.httpService.get(`${this.API_FOOTBALL_CONFIG.BASE_URL}${url}`, {
       headers: this.API_FOOTBALL_CONFIG.HEADERS, // ✅ ตั้ง Headers อัตโนมัติ
       params,

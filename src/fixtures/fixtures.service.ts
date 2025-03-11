@@ -4,22 +4,34 @@ import { firstValueFrom, of } from 'rxjs';
 import { APIFootballHttpService } from 'src/common/service/api-football-http.service';
 import { mockFixtures } from 'src/common/mock-data/fixtures';
 import { LeaguesService } from 'src/leagues/leagues.service';
+import { RedisService } from 'src/redos/redis.service';
 @Injectable()
 export class FixturesService {
   private fixtures: any[];
   constructor(
     private readonly apiFootballHttpService: APIFootballHttpService,
     private readonly leaguesService: LeaguesService,
+    private readonly redisService: RedisService,
   ) {}
   async getFixtures(date: string) {
+    const cacheKey = `fixtures`;
     try {
-      // const response = await firstValueFrom(
-      //   this.apiFootballHttpService.get('/fixtures', {
-      //     date,
-      //   }),
-      // );
+      // ✅ เช็ค Cache ก่อน
+      const cachedData = await this.redisService.get(cacheKey);
+      if (cachedData) {
+        console.log('✅ ใช้ข้อมูลจาก Cache');
+        return cachedData;
+      }
+      const { data }: any = await firstValueFrom(
+        this.apiFootballHttpService.get('/fixtures', {
+          date,
+        }),
+      );
+      const response = data.response;
 
-      const { response }: any = await firstValueFrom(of(mockFixtures));
+      console.log('call api foot ball');
+      // const { response }: any = await firstValueFrom(of(mockFixtures));
+
       if (response) {
         const league = await this.leaguesService.getLeagues();
         const leagueIds = league.response.map((item) => item.league.id);
@@ -27,10 +39,12 @@ export class FixturesService {
           leagueIds.includes(item.league.id),
         );
         const groupedMatches = this.groupByLeagueToArray(filter); // ใช้ matchesData เป็น JSON ที่คุณให้มา
-        return {
+        const data = {
           ...response.data,
           response: groupedMatches,
         };
+        await this.redisService.set(cacheKey, data, 1800);
+        return data;
       }
     } catch (error) {
       throw new Error('Failed to fetch fixtures');
