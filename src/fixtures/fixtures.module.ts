@@ -6,10 +6,11 @@ import { APIFootballHttpService } from 'src/common/service/api-football-http.ser
 import { LeaguesService } from 'src/leagues/leagues.service';
 import { RedisModule } from 'src/redos/redos.module';
 import { RedisService } from 'src/redos/redis.service';
+import { EventsGateway } from 'src/web-socket';
 
 @Module({
   imports: [HttpModule, RedisModule], // ✅ ใช้ HttpModule ในการดึง API ภายนอก
-  providers: [FixturesService, APIFootballHttpService, LeaguesService, RedisService],
+  providers: [FixturesService, APIFootballHttpService, LeaguesService, RedisService, EventsGateway],
   controllers: [FixturesController],
 })
 export class FixturesModule {}

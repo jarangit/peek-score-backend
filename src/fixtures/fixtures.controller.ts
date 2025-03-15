@@ -5,6 +5,11 @@ import { FixturesService } from './fixtures.service';
 export class FixturesController {
   constructor(private readonly fixturesService: FixturesService) {}
 
+  @Get('/cron')
+  getCron() {
+    return this.fixturesService.handleCron();
+  }
+
   @Get()
   async getFixtures(@Query('date') date: string) {
     if (!date) {

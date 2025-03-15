@@ -5,6 +5,8 @@ import { APIFootballHttpService } from 'src/common/service/api-football-http.ser
 import { mockFixtures } from 'src/common/mock-data/fixtures';
 import { LeaguesService } from 'src/leagues/leagues.service';
 import { RedisService } from 'src/redos/redis.service';
+import { Cron } from '@nestjs/schedule';
+import { EventsGateway } from 'src/web-socket';
 @Injectable()
 export class FixturesService {
   private fixtures: any[];
@@ -12,15 +14,33 @@ export class FixturesService {
     private readonly apiFootballHttpService: APIFootballHttpService,
     private readonly leaguesService: LeaguesService,
     private readonly redisService: RedisService,
+    private readonly eventsGateway: EventsGateway,
   ) {}
+  
+  handleCron() {
+    const data = Math.random() * 10;
+    console.log('data', data);
+    this.eventsGateway.sendNewData(data);
+    return data;
+  }
+  // @Cron('*/1 * * * * *') // Runs every 10 seconds
+  // handleCronFixtures() {
+  //   const data = `Fixture update ${Math.floor(Math.random() * 10)}`;
+  //   console.log(data);
+  //   this.eventsGateway.sendNewFixtures(data);
+  //   return data;
+  // }
+
   async getFixtures(date: string) {
     const cacheKey = `fixtures`;
+    let res: any;
     try {
       // ✅ เช็ค Cache ก่อน
       const cachedData = await this.redisService.get(cacheKey);
-      if (cachedData) {
+      if (cachedData?.response?.length) {
         console.log('✅ ใช้ข้อมูลจาก Cache');
-        return cachedData;
+        res = cachedData;
+        return res;
       }
       const { data }: any = await firstValueFrom(
         this.apiFootballHttpService.get('/fixtures', {
@@ -44,10 +64,14 @@ export class FixturesService {
           response: groupedMatches,
         };
         await this.redisService.set(cacheKey, data, 1800);
-        return data;
+        res = data;
+        return res;
       }
     } catch (error) {
       throw new Error('Failed to fetch fixtures');
+    } finally {
+      this.eventsGateway.sendNewFixtures(res);
+      return res;
     }
   }
 
