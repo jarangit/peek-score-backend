@@ -15,8 +15,8 @@ export class FixturesService {
     private readonly leaguesService: LeaguesService,
     private readonly redisService: RedisService,
     private readonly eventsGateway: EventsGateway,
-  ) {}
-  
+  ) { }
+
   handleCron() {
     const data = Math.random() * 10;
     console.log('data', data);
@@ -31,7 +31,7 @@ export class FixturesService {
   //   return data;
   // }
 
-  async getFixtures(date: string) {
+  async getFixtures(param: any) {
     const cacheKey = `fixtures`;
     let res: any;
     try {
@@ -44,7 +44,7 @@ export class FixturesService {
       }
       const { data }: any = await firstValueFrom(
         this.apiFootballHttpService.get('/fixtures', {
-          date,
+          ...param,
         }),
       );
       const response = data.response;

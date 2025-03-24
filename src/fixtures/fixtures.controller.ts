@@ -1,5 +1,6 @@
 import { Controller, Get, Query } from '@nestjs/common';
 import { FixturesService } from './fixtures.service';
+import { GetFixturesQueryDto } from './dto/get-fixtures.dot';
 
 @Controller('fixtures')
 export class FixturesController {
@@ -11,10 +12,7 @@ export class FixturesController {
   }
 
   @Get()
-  async getFixtures(@Query('date') date: string) {
-    if (!date) {
-      return { error: '❌ กรุณาระบุวันที่ (date) เช่น ?date=2025-03-08' };
-    }
-    return await this.fixturesService.getFixtures(date);
+  async getFixtures(@Query() query: GetFixturesQueryDto) {
+    return await this.fixturesService.getFixtures(query);
   }
 }
