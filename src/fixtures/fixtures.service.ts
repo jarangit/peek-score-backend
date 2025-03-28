@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
-import { Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { firstValueFrom, of } from 'rxjs';
 import { APIFootballHttpService } from 'src/common/service/api-football-http.service';
 import { mockFixtures } from 'src/common/mock-data/fixtures';
@@ -7,15 +7,17 @@ import { LeaguesService } from 'src/leagues/leagues.service';
 import { RedisService } from 'src/redos/redis.service';
 import { Cron } from '@nestjs/schedule';
 import { EventsGateway } from 'src/web-socket';
+import { GetFixturesQueryDto } from './dto/get-fixtures.dot';
 @Injectable()
 export class FixturesService {
   private fixtures: any[];
   constructor(
     private readonly apiFootballHttpService: APIFootballHttpService,
+    @Inject(forwardRef(() => LeaguesService))
     private readonly leaguesService: LeaguesService,
     private readonly redisService: RedisService,
     private readonly eventsGateway: EventsGateway,
-  ) { }
+  ) {}
 
   handleCron() {
     const data = Math.random() * 10;
@@ -31,8 +33,8 @@ export class FixturesService {
   //   return data;
   // }
 
-  async getFixtures(param: any) {
-    const cacheKey = `fixtures`;
+  async getFixtures(param: GetFixturesQueryDto) {
+    const cacheKey = `fixtures${JSON.stringify(param)}`;
     let res: any;
     try {
       // ✅ เช็ค Cache ก่อน

@@ -13,11 +13,11 @@ import { ElasticsearchModule } from './common/elasticsearch/elasticsearch.module
   imports: [
     HttpModule,
     FixturesModule,
-    ScheduleModule.forRoot(),
-    ConfigModule.forRoot({ isGlobal: true }),
-    LeaguesModule, // ✅ โหลด .env ทั่วระบบ
+    LeaguesModule,
     RedisModule,
     ElasticsearchModule,
+    ScheduleModule.forRoot(),
+    ConfigModule.forRoot({ isGlobal: true }),
   ],
   controllers: [AppController],
   providers: [AppService, HttpModule],
